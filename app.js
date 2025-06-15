@@ -19,9 +19,14 @@ database.connectDB().then(()=> {
 
     app.use('/api/v1/blogs', blogRouter )
     app.use('/api/v1/auth', authRouter )
+
+    app.get('/',(req,res)=>{
+    res.send('Blog Api')
+    })
+
     app.get('/health', (req,res)=>{
     res.send('OK')
-})
+    })
 
     app.listen(PORT, ()=>{
     console.log(`Server is running on  http://localhost:${PORT}`);
