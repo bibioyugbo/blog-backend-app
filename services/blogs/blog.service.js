@@ -21,7 +21,22 @@ const CreateBlog = async({title, description, author, author_id, state, read_cou
     }
 }
 
+const UpdateBlog = async (blogId, data)=>{
+     try {
+        const updatedBlog = await Blog.findByIdAndUpdate(
+            blogId,
+            data,
+            { new: true }
+        );   
+    
+        return updatedBlog;
+    } catch (error) {
+        throw new Error('Failed to update Blog: ' + error.message);
+    }  
+}
+
 
 module.exports = {
     CreateBlog,
+    UpdateBlog
 }

@@ -72,10 +72,8 @@ const getBlogsController = async (req,res)=>{
 }
 const getSingleBlogController = async (req, res) => {
   try {
-   
-    const state = 'published';
 
-    const blog = await Blog.findOne({ _id: req.params.id, state });
+    const blog = await Blog.findOne({ _id: req.params.id });
 
     if (!blog) {
       return res.status(404).json({
@@ -83,6 +81,9 @@ const getSingleBlogController = async (req, res) => {
         message: 'Blog not found',
       });
     }
+    
+     blog.read_count += 1;
+    await blog.save(); 
 
     return res.status(200).json({
       status: 'success',
@@ -98,13 +99,66 @@ const getSingleBlogController = async (req, res) => {
   }
 };
 
-// const updateBlogController = async(req,res)=>{
+const updateBlogController = async(req,res)=>{
+ try{
+     const blogId = req.params.id;
+     const payload = req.body;
+     const updatedBlog = await blogService.UpdateBlog(blogId,{state:payload.state});
+      if (!updatedBlog) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Blog not found'
+            });
+        }
+    return res.status(200).json({
+    status: 'success',
+    message: 'Blog updated successfully',
+    data: updatedBlog
+});
+}catch(err){
+     return res.status(500).json({
+            status: 'error',
+            message: 'Failed to update blogs',
+            error: err.message
+        });
+ }
+}
 
-// }
+const deleteBlogController = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    if (req.user.id !== blog.author_id.toString()) {
+      return res.status(403).json({ message: 'You are not authorized to delete this blog' });
+    }
+
+    await blog.deleteOne();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Blog deleted successfully',
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Failed to delete blog',
+      error: err.message,
+    });
+  }
+};
+
 
 
 module.exports ={
     createBlogController,
     getBlogsController,
-    getSingleBlogController
+    getSingleBlogController,
+    updateBlogController,
+    deleteBlogController
 }
